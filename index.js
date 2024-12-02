@@ -13,15 +13,15 @@ app.use(cors({
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
-// app.use((req,res,next)=>{
-//     if(!req.cookies){
-//         res.status(401).send("error")
-//     }else{
-//         req.user = req?.cookies?.accessToken
-//         next()
-//     }
-//     res.status(401).send("error")
-// })
+app.use((req,res,next)=>{
+    if(!req.cookies){
+        res.status(401).json({msg:"nocookies found"})
+    }else{
+        req.user = req?.cookies?.accessToken
+        next()
+    }
+    res.status(401).send("error")
+})
 
 let username = "nandishbs";
 let password = "nandsihbs";
@@ -54,16 +54,16 @@ app.post("/user/login", async(req,res)=>{
         if (accessToken && refreshToken) {
             return res
                 .cookie("accessToken", accessToken, {
-                    httpOnly: true, // Prevent JavaScript from accessing the cookie
-                    secure: false,  // Set to `true` in production when using HTTPS
-                    sameSite: 'none', // Ensure cross-site cookie safety (use 'lax' if needed)
+                    httpOnly: true,
+                    secure: false,
+                    sameSite: 'none',
                   })
                 .cookie("refreshToken", refreshToken,{httpOnly:true, secure:false, sameSite:'none'})
                 .status(201)
                 .json( {
-                    httpOnly: true, // Prevent JavaScript from accessing the cookie
-                    secure: false,  // Set to `true` in production when using HTTPS
-                    sameSite: 'none', // Ensure cross-site cookie safety (use 'lax' if needed)
+                    httpOnly: true,
+                    secure: true,  
+                    sameSite: 'none',
                   });
         } else {
             return res.status(401).json({
@@ -74,22 +74,21 @@ app.post("/user/login", async(req,res)=>{
         }
     }
 })
-// app.get("/", (req, res) => {
-//     try {
-        
-//         if (req.user) {
-//             if (decoded !== username) {
-//                 return res.status(401);
-//             } else {
-//                 return res
-//                 .status(200)
-//                 .json(["nandishbs", "nadithabs", "vanajakshibs", "shivakumarb"]);
-//             }
-//         }
-//     } catch (error) {
-//         console.log(error)
-//     }
-// });
+app.get("/", (req, res) => {
+    try {       
+        if (req.user) {
+            if (decoded !== username) {
+                return res.status(401);
+            } else {
+                return res
+                .status(200)
+                .json(["nandishbs", "nadithabs", "vanajakshibs", "shivakumarb"]);
+            }
+        }
+    } catch (error) {
+        console.log(error)
+    }
+});
 // app.post("/user/refresh", async (req, res) => {
 //     try {
 //         const accessToken = req.cookies.accessToken;
@@ -189,32 +188,32 @@ app.post("/user/login", async(req,res)=>{
 //     }
 // });
 
-// app.post("/user/logout", async (req, res) => {
-//     try {
-//         const accessToken = req.cookies.accessToken;
-//         if(!accessToken){
-//             res.status(401).json({msg:"not ok"})
-//         }
-//         accessToken? console.log("access token") : console.log("no access token")
+app.post("/user/logout", async (req, res) => {
+    try {
+        const accessToken = req.cookies.accessToken;
+        if(!accessToken){
+            res.status(401).json({msg:"not ok"})
+        }
+        accessToken? console.log("access token") : console.log("no access token")
 
-//         const decoded = jwt.verify(
-//             accessToken,
-//             process.env.JWT_ACCESS_TOKEN_SECRET
-//         ).username;
-//         if (decoded !== username) {
-//             return res.status(401);
-//         } else {
-//             return res
-//                 .status(201)
-//                 .clearCookie("accessToken")
-//                 .clearCookie("refreshToken")
-//                 .json({
-//                     status: 201,
-//                     msg: "logout successful",
-//                     success: "ok",
-//                 });
-//         }
-//     } catch (error) {
-//         console.log(error)
-//     }
-// });
+        const decoded = jwt.verify(
+            accessToken,
+            process.env.JWT_ACCESS_TOKEN_SECRET
+        ).username;
+        if (decoded !== username) {
+            return res.status(401);
+        } else {
+            return res
+                .status(201)
+                .clearCookie("accessToken")
+                .clearCookie("refreshToken")
+                .json({
+                    status: 201,
+                    msg: "logout successful",
+                    success: "ok",
+                });
+        }
+    } catch (error) {
+        console.log(error)
+    }
+});
